@@ -1,1 +1,0 @@
-("7.0" ("b45203286f79c02f7b979b4e28512813dedfeeff" . "b6e5efb30596f4cd58aaabd97fe458951a9898aa") (collects #"r6rs" #"main.rkt") (collects #"r6rs" #"private" #"prelims.rkt") (collects #"rnrs" #"base-6.rkt") (collects #"rnrs" #"io" #"simple-6.rkt") (collects #"srfi" #"%3a28.rkt"))
