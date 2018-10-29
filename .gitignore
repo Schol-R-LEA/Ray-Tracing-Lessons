@@ -1,4 +1,12 @@
+#test logs
+*.log
+
+# compilation output and temp build files
 */compiled/*
 bin/*
+
+# program output
 *.ppm
 
+#backup files
+*~
