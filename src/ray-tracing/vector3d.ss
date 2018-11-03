@@ -22,7 +22,7 @@
           &type-constraint-violation
           make-vector3D-type-constraint-violation 
           vector3D-type-constraint-violation?
-)
+          )
 
   (import (rnrs base (6))
           ;; composite standard lbrary, imports most std libs
@@ -68,7 +68,6 @@
       (sint  bytevector-sint-ref)
       (float bytevector-ieee-single-ref)
       (double bytevector-ieee-double-ref)))
-
   
 
   #| 
@@ -85,13 +84,11 @@
     (make-record-constructor-descriptor 
      'vector3D #f
      (lambda (ctor-vec3D)
-       (lambda (type-predicate u8-transcoder accessor-code x y z)
+       (lambda (type-predicate u8-transcoder x y z)
          (cond ((not ((procedure? type-predicate))) 
                 (raise &invalid-type-predicate-violation))
                ((not (procedure? u8-transcoder))
                 (raise &invalid-transcoder-violation))
-               ((not (assoc accessor-code accessor-lookup-table))
-                (raise &invalid-accessor-code-violation))
                ((not (and
                       (type-predicate x) 
                       (type-predicate y)
@@ -106,6 +103,28 @@
                   (ctor-vec3D 
                    (u8-list->bytevector xyz-list)))))))))
 
+
+  (define make-vector3D-from-bytevector
+    (make-record-constructor-descriptor 
+     'vector3D #f
+     (lambda (ctor-vec3D/bv)
+       (lambda (type-predicate accessor-code bv)
+         (let ((accessor (assoc accessor-code accessor-lookup-table)))
+           (cond ((not ((procedure? type-predicate))) 
+                  (raise &invalid-type-predicate-violation))
+                 ((not accessor)
+                  (raise &invalid-accessor-code-violation))
+                 ((not (and
+                        (type-predicate (accessor bv 0)) 
+                        (type-predicate (accessor bv 1))
+                        (type-predicate (accessor bv 2))))
+                  (raise &type-constraint-violation))
+                 (else
+                  (ctor-vec3D/bv (bytevector-copy bv)))))))))
+
+  (define  (vec3D-copy vec type-predicate accessor-code)
+    (make-vector3D-from-bytevector ))
+
   (define vector3D?
     (record-predicate 'vector3D))
 
@@ -116,13 +135,13 @@
     (field-accessor (vector3D-get-bytevector) n))
 
   (define (vec3d-x-of q field-accessor) 
-    (vector3D-n-of q 0))
+    (vector3D-n-of q 0 field-accessor))
 
   (define (vec3d-y-of q field-accessor) 
-    (vector3D-n-of q 1))
+    (vector3D-n-of q 1 field-accessor))
 
   (define (vec3d-z-of q field-accessor) 
-    (vector3D-n-of q 2))
+    (vector3D-n-of q 2 field-accessor))
 
 
   (define  (vector3D-list q field-accessor)
@@ -142,26 +161,23 @@
     (make-vector3D
      type-predicate
      transcoder
-     accessor-code
      (* (vec3d-x-of base field-accessor) scaling-factor)
      (* (vec3d-y-of base field-accessor) scaling-factor)
      (* (vec3d-z-of base field-accessor) scaling-factor)))
 
-  (define (vec3d-vector-sum base addend field-accessor)
+  (define (vec3d-scalar-sum base addend field-accessor type-predicate transcoder)
     (make-vector3D
      type-predicate
-     transcoder
-     accessor-code     
+     transcoder   
      (* (vec3d-x-of base field-accessor) addend)
      (* (vec3d-y-of base field-accessor) addend)
      (* (vec3d-z-of base field-accessor) addend)))
 
 
-  (define (vec3d-add base addend field-accessor type-predicate transcoder field-accessor type-predicate transcoder)
+  (define (vec3d-add base addend field-accessor type-predicate transcoder)
     (make-vector3D
      type-predicate
-     transcoder
-     accessor-code)
+     transcoder 
      (+ (vec3d-x-of base field-accessor) (vec3d-x-of addend field-accessor))
      (+ (vec3d-y-of base field-accessor) (vec3d-y-of addend field-accessor))
      (+ (vec3d-z-of base field-accessor) (vec3d-z-of addend field-accessor))))
@@ -171,7 +187,6 @@
     (make-vector3D
      type-predicate
      transcoder
-     accessor-code
      (- 1 (vec3d-x-of base field-accessor))
      (- 1 (vec3d-y-of base field-accessor))
      (- 1 (vec3d-z-of base field-accessor))))
@@ -179,7 +194,5 @@
 
   (define (vec3d-sub base subtrahend field-accessor type-predicate transcoder)
     (vec3d-add base 
-             (vec3d-negate subtrahend field-accessor type-predicate transcoder)
-             field-accessor type-predicate transcoder))
-
-
+               (vec3d-negate subtrahend field-accessor type-predicate transcoder)
+               field-accessor type-predicate transcoder)))

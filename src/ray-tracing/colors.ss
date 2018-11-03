@@ -1,6 +1,6 @@
 #!r6rs
 
-(library (ray-tracing types)
+(library (ray-tracing colors)
   (export rgb-color make-rgb-color rgb-color?
           red-of green-of blue-of color=?
           get-rgb-list color->numeric-string
@@ -16,14 +16,12 @@
           (ray-tracing vector3D)
           (average))
 
-  (define (rgb-element? rgb-element)
-    (and (integer? rgb-element)
-         (< 0 rgb-element)
-         (< rgb-element 256)))
+  (define (u8-constrain rgb-element)
+    (max 0 (min 255 (exact (ceil rgb-element)))))
 
 
   (define (rgb-transcode rgb-element)
-    rgb-element)
+    (u8-constrain rgb-element))
 
 
   (define rgb-color 
@@ -33,17 +31,31 @@
      A type that represents conventional 24-bit color
      as three 8-bit integers. 
      |#
-    'vector3D #f #f #f
-    '#()))
-
+     'vector3D #f #f #f
+     '#()))
 
   (define make-rgb-color
     (make-record-constructor-descriptor
      rgb-color make-vector3D
      (lambda (ctor-rgb-color)
        (lambda (r g b)
-         (ctor-vec3D rgb-element? rgb-transcoder field-accessor r g b)))))
+         (ctor-vec3D rgb-element? rgb-transcoder 
+                     (u8-constrain r) 
+                     (u8-constrain g)
+                     (u8-constrain b))))))
 
+  (define make-rgb-color-from-vec3D
+    (make-record-constructor-descriptor
+     rgb-color make-vector3D-from-bytevector
+     (lambda (ctor-rgb-color)
+       (lambda (vec)
+         (ctor-vec3D/bv 
+          integer? 
+          'u8
+          (make-vector3D (u8-constrain (vec3D-x-of vec bytevector-u8-ref))
+                         (u8-constrain (vec3D-y-of vec bytevector-u8-ref))
+                         (u8-constrain (vec3D-z-of vec bytevector-u8-ref))))))))
+  
   (define rgb-color?
     (record-predicate 'rgb-color))
 
@@ -62,38 +74,33 @@
 
   (define (color->numeric-string color)
     (string-append ""
-     (number->string (red-of color))
-     " "
-     (number->string (green-of color))
-     " "
-     (number->string (blue-of color))))
+                   (number->string (red-of color))
+                   " "
+                   (number->string (green-of color))
+                   " "
+                   (number->string (blue-of color))))
 
 
   (define (color=? base compared)
-    (and
-     (= (red-of base) (red-of compared))
-     (= (green-of base) (green-of compared))
-     (= (blue-of base) (blue-of compared))))
+    (vec3=? base compared bytevector-u8-ref))
   
   
   (define (blend-colors base mixin)
     (make-rgb-color
-     (avg (red-of base) (red-of mixin))
-     (avg (green-of base) (green-of mixin))
-     (avg (blue-of base) (blue-of mixin))))
-  
+     (u8-constrain (avg (red-of base)(red-of mixin)))
+     (u8-constrain (avg (green-of base) (green-of mixin)))
+     (u8-constrain (avg (blue-of base) (blue-of mixin)))))
+    
   (define (add-colors base mixin)
-    (make-rgb-color
-     (+ (red-of base) (red-of mixin))
-     (+ (green-of base) (green-of mixin))
-     (+ (blue-of base) (blue-of mixin))))
+    (make rgb-color-from-vec3D 
+      (vec3D-add base mixin bytevector-u8-ref)))
   
-  (define (subtract-colors base mixin)
-    (make-rgb-color
-     (abs (- (red-of base) (red-of mixin)))
-     (abs (- (green-of base) (green-of mixin)))
-     (abs (- (blue-of base) (blue-of mixin)))))   
   
+  (define (sub-colors base mixin)
+    (make rgb-color-from-vec3D 
+      (vec3D-sub base mixin bytevector-u8-ref)))
+  
+      
   ;; black and white  
   (define rgb-white (make-rgb-color #xff #xff #xff))
   (define rgb-black (make-rgb-color #x0 #x0 #x0))
@@ -109,45 +116,11 @@
   (define rgb-orange (make-rgb-color #xff #xff #x0))
   (define rgb-indigo (make-rgb-color #x0 #xff #xff))
   (define rgb-maroon (make-rgb-color #xff #x0 #xff))    
-
-
+  
+  
   (define standard-colors 
     (list
      rgb-white rgb-black 
      rgb-red rgb-green rgb-blue
      rgb-yellow rgb-cyan rgb-magenta
      rgb-orange rgb-indigo rgb-maroon)))
-
-
-
-
-
-#|
-
-(define-record-type spacial-coordinate
-(fields
-(immutable )
-(immutable rgba-color)))
-
-
-(define-record-type focal-pixel
-(fields
-(immutable width x)
-(immutable height y)
-(immutable rgba-color)))
-
-
-(define-record-type panel
-(fields (immutable plane))
-(protocol
-(lambda (ctor)
-(lambda (x y)
-((plane) (make-specialized-array 
-))))))
-
-
-
-(define-record-type space
-)
-
-|#

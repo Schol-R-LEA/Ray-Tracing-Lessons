@@ -6,7 +6,7 @@
   (rnrs (6))  
   ;; unit testing
   (srfi :64)
-  (ray-tracing types)
+  (ray-tracing colors)
   (average))
 
 
