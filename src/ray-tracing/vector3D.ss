@@ -1,17 +1,20 @@
 #!r6rs
 
 (library (ray-tracing vector3D)
-  (export vector3D make-vector3D vector3D?
+  (export rd-vector3D cd-vector3D
+          make-vector3D 
+          ;; make-vector3D-from-bytevector
+          vector3D?
           vector3D-get-bytevector vector3D-n-of
           vec3d-x-of vec3d-y-of vec3d-z-of         
-          vector3D-get-list
+          vector3D-list
           vec3d=? vec3d-scale vec3d-scalar-sum
-          vec3d-negate vec3d-add vec3d-sub vec3d-average
+          vec3d-negate vec3d-add vec3d-sub 
 
           bytevector-accessors
 
           &invalid-type-predicate-violation
-          make-type-predicate-violation
+          make-invalid-type-predicate-violation
           invalid-type-predicate-violation?
           &invalid-transcoder-violation
           make-invalid-transcoder-violation
@@ -19,7 +22,7 @@
           &invalid-accessor-code-violation
           make-invalid-accessor-code-violation
           invalid-accessor-code-violation?          
-          &type-constraint-violation
+          &vector3D-type-constraint-violation
           make-vector3D-type-constraint-violation 
           vector3D-type-constraint-violation?
           )
@@ -31,7 +34,7 @@
 
   (define-condition-type &invalid-type-predicate-violation
     &syntax 
-    make-type-predicate-violation
+    make-invalid-type-predicate-violation
     invalid-type-predicate-violation?)
 
 
@@ -45,7 +48,7 @@
     make-invalid-accessor-code-violation
     invalid-accessor-code-violation?)
 
-  (define-condition-type &type-constraint-violation
+  (define-condition-type &vector3D-type-constraint-violation
     &syntax 
     make-vector3D-type-constraint-violation 
     vector3D-type-constraint-violation?)
@@ -73,63 +76,86 @@
   #| 
   A type that represents an abstract 3D vector as a bytevector. 
   |#
-  (define vector3D 
+
+  (define rd-vector3D 
     (make-record-type-descriptor 
-     'vector3D
-     #f #f #f #f 
+     'vector3D #f #f #f #f
      '#((immutable coordinate-elements))))
 
 
-  (define make-vector3D
+  (define cd-vector3D
     (make-record-constructor-descriptor 
-     'vector3D #f
-     (lambda (ctor-vec3D)
+     rd-vector3D #f
+     (lambda (ctor)
        (lambda (type-predicate u8-transcoder x y z)
-         (cond ((not ((procedure? type-predicate))) 
-                (raise &invalid-type-predicate-violation))
+         (cond ((not (procedure? type-predicate))
+                (raise (make-invalid-type-predicate-violation
+                        (make-message-condition 
+                         "vector3D: given type predicate not a valid procedure."))))
                ((not (procedure? u8-transcoder))
-                (raise &invalid-transcoder-violation))
+                (raise (make-invalid-transcoder-violation
+                        "vector3D: not a valid bytevector transcoder.")))
                ((not (and
                       (type-predicate x) 
                       (type-predicate y)
                       (type-predicate z)))
-                (raise &type-constraint-violation))
-               (else 
+                (raise (make-vector3D-type-constraint-violation
+                        "vector3D: invalid ctor arguments.")))
+               (else
                 (let ((xyz-list 
                        (append 
                         (u8-transcoder x)
                         (u8-transcoder y)
                         (u8-transcoder z))))
-                  (ctor-vec3D 
+                  (ctor 
                    (u8-list->bytevector xyz-list)))))))))
-
-
+  
+  (define make-vector3D
+    (record-constructor cd-vector3D))
+  
+  
+  #|
   (define make-vector3D-from-bytevector
-    (make-record-constructor-descriptor 
-     'vector3D #f
-     (lambda (ctor-vec3D/bv)
-       (lambda (type-predicate accessor-code bv)
-         (let ((accessor (assoc accessor-code accessor-lookup-table)))
-           (cond ((not ((procedure? type-predicate))) 
-                  (raise &invalid-type-predicate-violation))
-                 ((not accessor)
-                  (raise &invalid-accessor-code-violation))
-                 ((not (and
-                        (type-predicate (accessor bv 0)) 
-                        (type-predicate (accessor bv 1))
-                        (type-predicate (accessor bv 2))))
-                  (raise &type-constraint-violation))
-                 (else
-                  (ctor-vec3D/bv (bytevector-copy bv)))))))))
-
-  (define  (vec3D-copy vec type-predicate accessor-code)
-    (make-vector3D-from-bytevector ))
-
+  (record-constructor
+  (make-record-constructor-descriptor 
+  'vector3D #f
+  (lambda (ctor-vec3D/bv)
+  (lambda (type-predicate accessor-code bv)
+  (let ((accessor (assoc accessor-code accessor-lookup-table)))
+  (cond ((not (procedure? type-predicate))
+  (raise (make-invalid-type-predicate-violation
+  (make-message-condition 
+  "vector3D: given type predicate not a valid procedure."))))
+  ((not accessor)
+  (raise (make-invalid-accessor-code-violation
+  (make-message-condition 
+  "vector3D: accessor type not valid."))))
+  ((not (and
+  (type-predicate (accessor bv 0)) 
+  (type-predicate (accessor bv 1))
+  (type-predicate (accessor bv 2))))
+  (raise (make-vector3D-type-constraint-violation
+  "vector3D: invalid ctor arguments.")))
+  
+  (else
+  (ctor-vec3D/bv (bytevector-copy bv))))))))))
+  |#
+  
   (define vector3D?
-    (record-predicate 'vector3D))
+    (record-predicate rd-vector3D))
+  
 
   (define vector3D-get-bytevector
-    (record-accessor 'vector3D 0))
+    (record-accessor rd-vector3D 0))
+
+  #|
+
+  (define (vec3D-copy vec type-predicate accessor-code)
+  (make-vector3D-from-bytevector type-predicate 
+  accessor-code 
+  (bytevector-copy vector3D-get-bytevector)))
+
+  |#
 
   (define (vector3D-n-of q n field-accessor)
     (field-accessor (vector3D-get-bytevector) n))
@@ -148,7 +174,6 @@
     (list (vec3d-x-of q field-accessor)
           (vec3d-y-of q field-accessor)
           (vec3d-z-of q field-accessor)))
-
 
   (define (vec3d=? base compared field-accessor)
     (and

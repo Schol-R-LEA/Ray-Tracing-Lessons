@@ -54,6 +54,8 @@ https://stackoverflow.com/questions/2710713/algorithm-to-generate-all-possible-p
    (test-group 
     "Test creation of new color"
     (let ((maroon (make-rgb-color #xff 0 #xff)))
+      (display (red-of maroon))
+      (newline)
       (test-equal #xff (red-of maroon))
       (test-equal 0 (green-of maroon))
       (test-equal #xff (blue-of maroon))))

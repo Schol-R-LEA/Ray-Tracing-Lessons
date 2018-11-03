@@ -1,7 +1,7 @@
 #!r6rs
 
 (library (ray-tracing colors)
-  (export rgb-color make-rgb-color rgb-color?
+  (export make-rgb-color rgb-color?
           red-of green-of blue-of color=?
           get-rgb-list color->numeric-string
           blend-colors add-colors subtract-colors
@@ -17,56 +17,53 @@
           (average))
 
   (define (u8-constrain rgb-element)
-    (max 0 (min 255 (exact (ceil rgb-element)))))
+    (max 0 (min 255 (exact (ceiling rgb-element)))))
 
+
+  (define (rgb-element? el)
+    (integer? el))
 
   (define (rgb-transcode rgb-element)
     (u8-constrain rgb-element))
 
 
-  (define rgb-color 
+  
+  ;;;A type that represents conventional 24-bit color
+  ;;;as three 8-bit integers. 
+
+
+  (define rd-rgb-color
     (make-record-type-descriptor 
      'rgb-color
-     #| 
-     A type that represents conventional 24-bit color
-     as three 8-bit integers. 
-     |#
-     'vector3D #f #f #f
+     rd-vector3D #f #f #f 
      '#()))
 
-  (define make-rgb-color
-    (make-record-constructor-descriptor
-     rgb-color make-vector3D
-     (lambda (ctor-rgb-color)
-       (lambda (r g b)
-         (ctor-vec3D rgb-element? rgb-transcoder 
-                     (u8-constrain r) 
-                     (u8-constrain g)
-                     (u8-constrain b))))))
 
-  (define make-rgb-color-from-vec3D
+  (define cd-rgb-color 
     (make-record-constructor-descriptor
-     rgb-color make-vector3D-from-bytevector
-     (lambda (ctor-rgb-color)
-       (lambda (vec)
-         (ctor-vec3D/bv 
-          integer? 
-          'u8
-          (make-vector3D (u8-constrain (vec3D-x-of vec bytevector-u8-ref))
-                         (u8-constrain (vec3D-y-of vec bytevector-u8-ref))
-                         (u8-constrain (vec3D-z-of vec bytevector-u8-ref))))))))
-  
+     rd-rgb-color cd-vector3D
+     (lambda (ctor)
+       (lambda (r g b)
+         (ctor rgb-element?
+               rgb-transcode 
+               (u8-constrain r) 
+               (u8-constrain g)
+               (u8-constrain b))))))
+
+  (define make-rgb-color (record-constructor cd-rgb-color))
+
+
   (define rgb-color?
-    (record-predicate 'rgb-color))
+    (record-predicate rd-rgb-color))
 
   (define (red-of color)
-    (vec3D-x-of color rgb-element? rgb-transcoder bytevector-u8-ref))
+    (vec3d-x-of color bytevector-u8-ref))
 
   (define (green-of color)
-    (vec3D-y-of color rgb-element? rgb-transcoder bytevector-u8-ref))
+    (vec3d-y-of color bytevector-u8-ref))
 
   (define (blue-of color)
-    (vec3D-x-of color rgb-element? rgb-transcoder bytevector-u8-ref))
+    (vec3d-x-of color bytevector-u8-ref))
 
 
   (define  (get-rgb-list color)
@@ -82,25 +79,34 @@
 
 
   (define (color=? base compared)
-    (vec3=? base compared bytevector-u8-ref))
-  
-  
+    (vec3d=? base compared bytevector-u8-ref))
+
+
   (define (blend-colors base mixin)
     (make-rgb-color
-     (u8-constrain (avg (red-of base)(red-of mixin)))
+     (u8-constrain (avg (red-of base) (red-of mixin)))
      (u8-constrain (avg (green-of base) (green-of mixin)))
      (u8-constrain (avg (blue-of base) (blue-of mixin)))))
-    
+
   (define (add-colors base mixin)
-    (make rgb-color-from-vec3D 
-      (vec3D-add base mixin bytevector-u8-ref)))
-  
-  
-  (define (sub-colors base mixin)
-    (make rgb-color-from-vec3D 
-      (vec3D-sub base mixin bytevector-u8-ref)))
-  
-      
+    (make-rgb-color
+     (u8-constrain 
+      (+ (red-of base) (red-of mixin)))
+     (u8-constrain 
+      (+ (green-of base) (green-of mixin)))
+     (u8-constrain 
+      (+ (blue-of base) (blue-of mixin)))))
+
+  (define (subtract-colors base mixin)
+    (make-rgb-color
+     (u8-constrain 
+      (- (red-of base) (red-of mixin)))
+     (u8-constrain 
+      (- (green-of base) (green-of mixin)))
+     (u8-constrain 
+      (- (blue-of base) (blue-of mixin)))))
+
+
   ;; black and white  
   (define rgb-white (make-rgb-color #xff #xff #xff))
   (define rgb-black (make-rgb-color #x0 #x0 #x0))
@@ -116,8 +122,8 @@
   (define rgb-orange (make-rgb-color #xff #xff #x0))
   (define rgb-indigo (make-rgb-color #x0 #xff #xff))
   (define rgb-maroon (make-rgb-color #xff #x0 #xff))    
-  
-  
+
+
   (define standard-colors 
     (list
      rgb-white rgb-black 
