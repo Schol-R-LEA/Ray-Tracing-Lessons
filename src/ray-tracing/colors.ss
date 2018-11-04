@@ -17,7 +17,7 @@
           (average))
 
   (define (u8-constrain rgb-element)
-    (max 0 (min 255 (exact (ceiling rgb-element)))))
+    (max 0 (min 255 (exact (floor rgb-element)))))
 
 
   (define (rgb-element? el)
@@ -42,13 +42,15 @@
   (define cd-rgb-color 
     (make-record-constructor-descriptor
      rd-rgb-color cd-vector3D
-     (lambda (ctor)
+     (lambda (ctor-vec3d)
        (lambda (r g b)
-         (ctor rgb-element?
-               rgb-transcode 
-               (u8-constrain r) 
-               (u8-constrain g)
-               (u8-constrain b))))))
+         (let ((ctor-rgb 
+                (ctor-vec3d rgb-element?
+                            rgb-transcode 
+                            (u8-constrain r) 
+                            (u8-constrain g)
+                            (u8-constrain b))))
+           (ctor-rgb))))))
 
   (define make-rgb-color 
     (record-constructor cd-rgb-color))
