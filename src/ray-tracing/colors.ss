@@ -50,7 +50,8 @@
                (u8-constrain g)
                (u8-constrain b))))))
 
-  (define make-rgb-color (record-constructor cd-rgb-color))
+  (define make-rgb-color 
+    (record-constructor cd-rgb-color))
 
   (define rgb-color?
     (record-predicate rd-rgb-color))
@@ -62,7 +63,7 @@
     (vec3d-y-of color bytevector-u8-ref))
 
   (define (blue-of color)
-    (vec3d-x-of color bytevector-u8-ref))
+    (vec3d-z-of color bytevector-u8-ref))
 
 
   (define  (rgb-color->list color)
