@@ -98,7 +98,7 @@ https://stackoverflow.com/questions/2710713/algorithm-to-generate-all-possible-p
      and subtractive mixing of colors"
     (let ((magenta (blend-colors rgb-red rgb-blue)))
       (display "magenta: ")
-      (display (color->numeric-string magenta))
+      (display (rgb-color->numeric-string magenta))
       (newline)
       (test-equal #x7f (red-of magenta))
       (test-equal 0 (green-of magenta))
@@ -107,7 +107,7 @@ https://stackoverflow.com/questions/2710713/algorithm-to-generate-all-possible-p
     
     (let ((yellow (blend-colors rgb-red rgb-green)))
       (display "yellow: ")
-      (display (color->numeric-string yellow))
+      (display (rgb-color->numeric-string yellow))
       (newline)
       (test-equal #x7f (red-of yellow))
       (test-equal #x7f (green-of yellow))
@@ -116,7 +116,7 @@ https://stackoverflow.com/questions/2710713/algorithm-to-generate-all-possible-p
 
       (let ((maroon (add-colors rgb-red rgb-blue)))
         (display "maroon: ")
-        (display (color->numeric-string maroon))
+        (display (rgb-color->numeric-string maroon))
         (newline)
         (test-equal #xff (red-of maroon))
         (test-equal 0 (green-of maroon))
@@ -126,10 +126,10 @@ https://stackoverflow.com/questions/2710713/algorithm-to-generate-all-possible-p
       (let ((maroon (make-rgb-color #xff 0 #xff))
             (red-blue (add-colors rgb-red rgb-blue)))
         (display "maroon: ")
-        (display (color->numeric-string maroon))
+        (display (rgb-color->numeric-string maroon))
         (newline)
         (display "red-blue: ")
-        (display (color->numeric-string red-blue))
+        (display (rgb-color->numeric-string red-blue))
         (newline)
         (test-equal (red-of maroon) (red-of red-blue))
         (test-equal (green-of maroon) (green-of red-blue))
@@ -139,4 +139,4 @@ https://stackoverflow.com/questions/2710713/algorithm-to-generate-all-possible-p
    (test-group 
     "Test returing PPM formatted colors"
     (test-assert (string=? "255 0 0" 
-                            (color->numeric-string rgb-red))))))
+                            (rgb-color->numeric-string rgb-red))))))

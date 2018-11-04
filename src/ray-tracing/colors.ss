@@ -3,7 +3,7 @@
 (library (ray-tracing colors)
   (export make-rgb-color rgb-color?
           red-of green-of blue-of color=?
-          rgb-color->list color->numeric-string
+          rgb-color->list rgb-color->numeric-string
           blend-colors add-colors subtract-colors
           standard-colors rgb-white rgb-black 
           rgb-red rgb-green rgb-blue
@@ -71,7 +71,7 @@
   (define  (rgb-color->list color)
     (list (red-of color) (green-of color) (blue-of color)))
 
-  (define (color->numeric-string color)
+  (define (rgb-color->numeric-string color)
     (string-append ""
                    (number->string (red-of color))
                    " "
