@@ -4,6 +4,7 @@
 # compilation output and temp build files
 */compiled/*
 bin/*
+*.pgm
 
 #symbolic links for Racket
 *.ss

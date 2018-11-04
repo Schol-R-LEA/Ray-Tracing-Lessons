@@ -1,9 +1,9 @@
 #!r6rs
 
 (library (ray-tracing vector3D)
-  (export rd-vector3D cd-vector3D
-          make-vector3D 
-          ;; make-vector3D-from-bytevector
+  (export rd-vector3D cd-vector3D make-vector3D 
+          cd-vector3D-from-bytevector
+          make-vector3D-from-bytevector
           vector3D?
           vector3D-get-bytevector vector3D-n-of
           vec3d-x-of vec3d-y-of vec3d-z-of         
@@ -113,48 +113,44 @@
     (record-constructor cd-vector3D))
   
   
-  #|
+  (define cd-vector3D-from-bytevector
+     (make-record-constructor-descriptor 
+      rd-vector3D #f
+      (lambda (ctor-vec3D/bv)
+        (lambda (type-predicate accessor-code bv)
+          (let ((accessor (assoc accessor-code accessor-lookup-table)))
+            (cond ((not (procedure? type-predicate))
+                   (raise (make-invalid-type-predicate-violation
+                           (make-message-condition 
+                            "vector3D: given type predicate not a valid procedure."))))
+                  ((not accessor)
+                   (raise (make-invalid-accessor-code-violation
+                           (make-message-condition 
+                            "vector3D: accessor type not valid."))))
+                  ((not (and
+                         (type-predicate (accessor bv 0)) 
+                         (type-predicate (accessor bv 1))
+                         (type-predicate (accessor bv 2))))
+                   (raise (make-vector3D-type-constraint-violation
+                           "vector3D: invalid ctor arguments.")))
+                  
+                  (else
+                   (ctor-vec3D/bv (bytevector-copy bv)))))))))
+
   (define make-vector3D-from-bytevector
-  (record-constructor
-  (make-record-constructor-descriptor 
-  'vector3D #f
-  (lambda (ctor-vec3D/bv)
-  (lambda (type-predicate accessor-code bv)
-  (let ((accessor (assoc accessor-code accessor-lookup-table)))
-  (cond ((not (procedure? type-predicate))
-  (raise (make-invalid-type-predicate-violation
-  (make-message-condition 
-  "vector3D: given type predicate not a valid procedure."))))
-  ((not accessor)
-  (raise (make-invalid-accessor-code-violation
-  (make-message-condition 
-  "vector3D: accessor type not valid."))))
-  ((not (and
-  (type-predicate (accessor bv 0)) 
-  (type-predicate (accessor bv 1))
-  (type-predicate (accessor bv 2))))
-  (raise (make-vector3D-type-constraint-violation
-  "vector3D: invalid ctor arguments.")))
-  
-  (else
-  (ctor-vec3D/bv (bytevector-copy bv))))))))))
-  |#
-  
+    (record-constructor cd-vector3D))
+
+  (define (vec3D-copy vec type-predicate accessor-code)
+    (make-vector3D-from-bytevector type-predicate 
+                                   accessor-code 
+                                   (bytevector-copy vector3D-get-bytevector)))
+
   (define vector3D?
     (record-predicate rd-vector3D))
-  
 
   (define vector3D-get-bytevector
     (record-accessor rd-vector3D 0))
 
-  #|
-
-  (define (vec3D-copy vec type-predicate accessor-code)
-  (make-vector3D-from-bytevector type-predicate 
-  accessor-code 
-  (bytevector-copy vector3D-get-bytevector)))
-
-  |#
 
   (define (vector3D-n-of q n field-accessor)
     (field-accessor (vector3D-get-bytevector q) n))
@@ -176,9 +172,12 @@
 
   (define (vec3d=? base compared field-accessor)
     (and
-     (= (vec3d-x-of base field-accessor) (vec3d-x-of compared field-accessor))
-     (= (vec3d-y-of base field-accessor) (vec3d-y-of compared field-accessor))
-     (= (vec3d-z-of base field-accessor) (vec3d-z-of compared field-accessor))))
+     (= (vec3d-x-of base field-accessor) 
+        (vec3d-x-of compared field-accessor))
+     (= (vec3d-y-of base field-accessor)
+        (vec3d-y-of compared field-accessor))
+     (= (vec3d-z-of base field-accessor)
+        (vec3d-z-of compared field-accessor))))
 
 
   (define (vec3d-scale base scaling-factor field-accessor type-predicate transcoder)
@@ -218,5 +217,6 @@
 
   (define (vec3d-sub base subtrahend field-accessor type-predicate transcoder)
     (vec3d-add base 
-               (vec3d-negate subtrahend field-accessor type-predicate transcoder)
+               (vec3d-negate subtrahend 
+                             field-accessor type-predicate transcoder)
                field-accessor type-predicate transcoder)))

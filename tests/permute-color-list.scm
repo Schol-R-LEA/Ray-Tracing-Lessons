@@ -4,7 +4,7 @@
   (rnrs base (6))
   ;; composite standard library, imports most std libs
   (rnrs (6))
-  (ray-tracing types))
+  (ray-tracing colors))
 
 
 (define (permute-list wd)
@@ -31,5 +31,5 @@ https://stackoverflow.com/questions/2710713/algorithm-to-generate-all-possible-p
 (tabulate-list 
  (permute-list 
   (map (lambda (color)
-         (get-rgb-list color))
+         (rgb-color->list color))
        (list rgb-red rgb-green rgb-blue rgb-white rgb-black))))
