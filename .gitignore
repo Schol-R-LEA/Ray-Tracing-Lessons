@@ -5,8 +5,12 @@
 */compiled/*
 bin/*
 
+#symbolic links for Racket
+*.ss
+
 # program output
 *.ppm
 
 #backup files
 *~
+
