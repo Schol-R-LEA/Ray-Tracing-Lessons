@@ -3,7 +3,7 @@
 (library (ray-tracing colors)
   (export make-rgb-color rgb-color?
           red-of green-of blue-of color=?
-          get-rgb-list color->numeric-string
+          rgb-color->list color->numeric-string
           blend-colors add-colors subtract-colors
           standard-colors rgb-white rgb-black 
           rgb-red rgb-green rgb-blue
@@ -24,7 +24,7 @@
     (integer? el))
 
   (define (rgb-transcode rgb-element)
-    (u8-constrain rgb-element))
+    (list (u8-constrain rgb-element)))
 
 
   
@@ -52,7 +52,6 @@
 
   (define make-rgb-color (record-constructor cd-rgb-color))
 
-
   (define rgb-color?
     (record-predicate rd-rgb-color))
 
@@ -66,7 +65,7 @@
     (vec3d-x-of color bytevector-u8-ref))
 
 
-  (define  (get-rgb-list color)
+  (define  (rgb-color->list color)
     (list (red-of color) (green-of color) (blue-of color)))
 
   (define (color->numeric-string color)

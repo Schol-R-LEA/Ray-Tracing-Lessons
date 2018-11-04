@@ -7,7 +7,7 @@
           vector3D?
           vector3D-get-bytevector vector3D-n-of
           vec3d-x-of vec3d-y-of vec3d-z-of         
-          vector3D-list
+          vector3D->list
           vec3d=? vec3d-scale vec3d-scalar-sum
           vec3d-negate vec3d-add vec3d-sub 
 
@@ -24,8 +24,7 @@
           invalid-accessor-code-violation?          
           &vector3D-type-constraint-violation
           make-vector3D-type-constraint-violation 
-          vector3D-type-constraint-violation?
-          )
+          vector3D-type-constraint-violation?)
 
   (import (rnrs base (6))
           ;; composite standard lbrary, imports most std libs
@@ -158,7 +157,7 @@
   |#
 
   (define (vector3D-n-of q n field-accessor)
-    (field-accessor (vector3D-get-bytevector) n))
+    (field-accessor (vector3D-get-bytevector q) n))
 
   (define (vec3d-x-of q field-accessor) 
     (vector3D-n-of q 0 field-accessor))
@@ -170,7 +169,7 @@
     (vector3D-n-of q 2 field-accessor))
 
 
-  (define  (vector3D-list q field-accessor)
+  (define  (vector3D->list q field-accessor)
     (list (vec3d-x-of q field-accessor)
           (vec3d-y-of q field-accessor)
           (vec3d-z-of q field-accessor)))

@@ -18,11 +18,21 @@
    (test-group 
     "Test creation of new color"
     (let* ((vec-u8 (make-vector3D integer? 
-                                  (lambda (n) n) 
-                                  '(#xff) '(0) '(#xff)))
-           (x (vec3d-)))
-     
+                                  (lambda (n) (list  n)) 
+                                  #xff 0 #x7f))
+           (w (vector3D-n-of vec-u8 2 bytevector-u8-ref))
+           (x (vec3d-x-of vec-u8 bytevector-u8-ref))
+           (y (vec3d-y-of vec-u8 bytevector-u8-ref))
+           (z (vec3d-z-of vec-u8 bytevector-u8-ref)))
+      (display w)
       (newline)
+      (display x)
+      (newline)
+      (display y)
+      (newline)
+      (display z)
+      (newline)
+      (test-equal #x7f w)
       (test-equal #xff x)
       (test-equal 0 y)
-      (test-equal #xff z)))))
+      (test-equal #x7f z)))))
