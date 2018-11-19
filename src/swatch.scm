@@ -3,9 +3,42 @@
 (import 
   (rnrs base (6))
   ;; composite standard library, imports most std libs
-  (rnrs io ports (6))
-  (ray-tracing types))
+  (rnrs io simple (6))
+  ;; basic string formatting
+  (srfi :28)
+  (ray-tracing colors))
 
 
-(define (make-swatch color filename)
-  ())
+(define (make-ppm-solid-line color width)
+  (let ((color-values (string-append 
+                       (rgb-color->numeric-string color) 
+                       " ")))
+    (let loop ((w width))
+      (cond ((< w 1) "")
+            ((= w 1) color-values)
+            (else (string-append color-values
+                                 (loop (- w 1))))))))
+
+
+(define (make-ppm-simple-solid-swatch color width height)
+  (let ((line (string-append (make-ppm-solid-line color width) "\n")))
+    (let loop ((h height))
+      (cond ((< h 1) "")
+            ((= h 1) line)
+            (else (string-append line 
+                                 (loop (- h 1))))))))
+
+#|
+(define (make-ppm-solid-swatch-generator color width height)
+  (lambda (c w h)
+    (list 
+     (make-ppm-solid-line color width)
+     (lambda ))))
+
+  (make-ppm-solid-line ))
+|#
+
+
+(display "P3\n1000 800\n255\n\n")
+(display (make-ppm-simple-solid-swatch (make-rgb-color 127 0 255) 1000 800))
+(newline)

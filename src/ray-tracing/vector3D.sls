@@ -59,15 +59,15 @@
 
   (define accessor-lookup-table
     '((u8 bytevector-u8-ref)
-      (s8  bytevector-s8-ref)
+      (s8 bytevector-s8-ref)
       (u16 bytevector-u16-ref)
-      (s16  bytevector-s16-ref)
+      (s16 bytevector-s16-ref)
       (u32 bytevector-u32-ref)
-      (s32  bytevector-s32-ref)
+      (s32 bytevector-s32-ref)
       (u64 bytevector-u64-ref)
-      (s64  bytevector-s64-ref)
+      (s64 bytevector-s64-ref)
       (uint bytevector-uint-ref)
-      (sint  bytevector-sint-ref)
+      (sint bytevector-sint-ref)
       (float bytevector-ieee-single-ref)
       (double bytevector-ieee-double-ref)))
   
@@ -112,38 +112,19 @@
   (define make-vector3D
     (record-constructor cd-vector3D))
   
-  
   (define cd-vector3D-from-bytevector
-     (make-record-constructor-descriptor 
-      rd-vector3D #f
-      (lambda (ctor-vec3D/bv)
-        (lambda (type-predicate accessor-code bv)
-          (let ((accessor (assoc accessor-code accessor-lookup-table)))
-            (cond ((not (procedure? type-predicate))
-                   (raise (make-invalid-type-predicate-violation
-                           (make-message-condition 
-                            "vector3D: given type predicate not a valid procedure."))))
-                  ((not accessor)
-                   (raise (make-invalid-accessor-code-violation
-                           (make-message-condition 
-                            "vector3D: accessor type not valid."))))
-                  ((not (and
-                         (type-predicate (accessor bv 0)) 
-                         (type-predicate (accessor bv 1))
-                         (type-predicate (accessor bv 2))))
-                   (raise (make-vector3D-type-constraint-violation
-                           "vector3D: invalid ctor arguments.")))
-                  
-                  (else
-                   (ctor-vec3D/bv (bytevector-copy bv)))))))))
+    (make-record-constructor-descriptor 
+     rd-vector3D #f
+     (lambda (ctor-vec3D/bv)
+       (lambda (bv)
+         (ctor-vec3D/bv (bytevector-copy bv))))))
 
   (define make-vector3D-from-bytevector
-    (record-constructor cd-vector3D))
+    (record-constructor cd-vector3D-from-bytevector))
 
   (define (vec3D-copy vec type-predicate accessor-code)
-    (make-vector3D-from-bytevector type-predicate 
-                                   accessor-code 
-                                   (bytevector-copy vector3D-get-bytevector)))
+    (make-vector3D-from-bytevector                          
+     (bytevector-copy vector3D-get-bytevector)))
 
   (define vector3D?
     (record-predicate rd-vector3D))
@@ -201,9 +182,12 @@
     (make-vector3D
      type-predicate
      transcoder 
-     (+ (vec3d-x-of base field-accessor) (vec3d-x-of addend field-accessor))
-     (+ (vec3d-y-of base field-accessor) (vec3d-y-of addend field-accessor))
-     (+ (vec3d-z-of base field-accessor) (vec3d-z-of addend field-accessor))))
+     (+ (vec3d-x-of base field-accessor) 
+        (vec3d-x-of addend field-accessor))
+     (+ (vec3d-y-of base field-accessor)
+        (vec3d-y-of addend field-accessor))
+     (+ (vec3d-z-of base field-accessor)
+        (vec3d-z-of addend field-accessor))))
 
 
   (define (vec3d-negate base field-accessor type-predicate transcoder)

@@ -10,6 +10,11 @@
   (average))
 
 
+(define (factorial n)
+  (cond ((= 0 n) 1)
+        ((= 1 n) 1)
+        (else (* n (factorial (- n 1))))))
+
 (define (permute-list wd)
   "as per the solution given by 'Pie o Pah' in this S-O answer:
 https://stackoverflow.com/questions/2710713/algorithm-to-generate-all-possible-permutations-of-a-list"
@@ -76,38 +81,47 @@ https://stackoverflow.com/questions/2710713/algorithm-to-generate-all-possible-p
     "Test comparing colors"
     ;; a few manual tests to start
     (test-assert (color=? rgb-red rgb-red))
-    (test-assert (not (color=? rgb-red rgb-green))))
+    (test-assert (not (color=? rgb-red rgb-green)))
 
-   ;; generative test series
-   (let* ((test-colors 
-           (list rgb-white rgb-black 
-                 rgb-red rgb-green rgb-blue))
-          (stride (length test-colors))
-          (endpoint (- stride 1)))
-     (do ((matrix (permute-list test-colors))
-          (comparison-list test-colors)
-          (i 0 (+ i 1))) 
-         ((> i endpoint))
-       (do ((j 0 (+ j 1)))
-           ((> j endpoint))
-         (let* ((test-color (list-ref (list-ref matrix i) j))
-                (comparison-color (list-ref comparison-list j))
-                (test-result (color=? test-color comparison-color)))
-           (display (rgb-color->list test-color))
-           (test-assert (rgb-color? test-color))
-           (test-assert 
-               (if (or (= 0 i)
-                       (< j (- endpoint i))) 
-                   (begin
-                     (display " == ")
-                     (display (rgb-color->list comparison-color))
-                     (newline)                     
-                     test-result)
-                   (begin 
-                     (display " =/= ")
-                     (display (rgb-color->list comparison-color))
-                     (newline)
-                     (not test-result))))))))
+    ;; generative test series
+    #|
+    (let* ((test-colors 
+            (list
+             ;; rgb-white rgb-black 
+             rgb-red rgb-green rgb-blue))
+           (j-stride (length test-colors))
+           (i-stride (factorial j-stride))
+           (i-endpoint (- i-stride 1))
+           (j-endpoint (- j-stride 1)))
+      (do ((matrix (permute-list test-colors))
+           (comparison-list test-colors)
+           (i 0 (+ i 1))) 
+          ((> i i-endpoint))
+        (do ((j 0 (+ j 1)))
+            ((> j j-endpoint))
+          (let* ((test-color (list-ref (list-ref matrix i) j))
+                 (comparison-color (list-ref comparison-list j))
+                 (test-result (color=? test-color comparison-color)))
+            (display (rgb-color->list test-color))
+            (test-assert (rgb-color? test-color))
+            (test-assert
+                (if (or
+                     (= i 0)
+                     (and 
+                      (< j (- j-endpoint i))
+                      (< i j-endpoint))
+                     (= (mod j-stride i) 0))
+                    (begin
+                      (display " == ")
+                      (display (rgb-color->list comparison-color))
+                      (newline)
+                      test-result)
+                    (begin 
+                      (display " =/= ")
+                      (display (rgb-color->list comparison-color))
+                      (newline)
+                      (not test-result)))))))))
+    |#
 
    (test-group 
     "Test values blending, additive mixing, 

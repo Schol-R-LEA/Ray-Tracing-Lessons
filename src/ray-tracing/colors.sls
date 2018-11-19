@@ -26,7 +26,6 @@
   (define (rgb-transcode rgb-element)
     (list (u8-constrain rgb-element)))
 
-
   
   ;;;A type that represents conventional 24-bit color
   ;;;as three 8-bit integers. 
