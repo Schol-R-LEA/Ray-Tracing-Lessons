@@ -28,17 +28,28 @@
             (else (string-append line 
                                  (loop (- h 1))))))))
 
-#|
+
 (define (make-ppm-solid-swatch-generator color width height)
-  (lambda (c w h)
-    (list 
-     (make-ppm-solid-line color width)
-     (lambda ))))
+  (let ((recur
+         (lambda (c w h)
+           (cons 
+            (make-ppm-solid-line color width)
+            ((lambda (y) 
+               (recur c w y))
+             (- h 1))))))
+    recur))
 
-  (make-ppm-solid-line ))
-|#
 
-
+#|
 (display "P3\n1000 800\n255\n\n")
 (display (make-ppm-simple-solid-swatch (make-rgb-color 127 0 255) 1000 800))
 (newline)
+|#
+
+(define (generate-ppm-header width height hues pixels)
+  (format "P3~%~a ~a~%~a~%~a"
+          width height hues pixels))
+
+(display (generate-ppm-header 1000 800 255 
+                              (make-ppm-simple-solid-swatch 
+                               (make-rgb-color 127 0 255) 1000 800)))
