@@ -5,6 +5,7 @@
 */compiled/*
 bin/*
 *.pgm
+*.slfasl
 
 #symbolic links for Racket
 *.ss
