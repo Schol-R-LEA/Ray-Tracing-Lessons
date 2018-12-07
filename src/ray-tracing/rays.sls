@@ -1,13 +1,10 @@
 #!r6rs
 
-(library (ray-tracing spacial-vectors)
-  (export spacial-vector3D make-spacial-vector3D spacial-vector3D?
-          sv-n-of sv-x-of sv-y-of sv-z-of
-          sv-get-list
-          sv=? sv-scale sv-scalar-sum
-          sv-negate sv-add sv-sub
-          sv-average
-          sv-dot-product sv-cross-product)
+(library (ray-tracing ray3D)
+  (export ray3D make-ray3D ray3D?
+          n-of-3D-ray x-of-3D-ray y-of-3D-ray z-of-3D-ray
+          ray3D-get-list
+          ray3D=?)
 
   (import (rnrs base (6))
           (rnrs (6))
@@ -15,16 +12,16 @@
           (average))
 
 
-  (define spacial-vector3D 
+  (define ray3D 
     (make-record-type-descriptor
-     'spacial-vector3D
+     'ray3D
      'vector3D
      #f #f #f
      '#((immutable byte-size)
         (immutable field-accessor)))
 
 
-  (define (sv-dot-product base multiplicand)
+  (define (ray3D-dot-product base multiplicand)
     (+ 
      (* (vec3d-x-of) (vec3d-x-of multiplicand field-accessor))
      (* (vec3d-y-of base field-accessor) (vec3d-y-of multiplicand field-accessor))
