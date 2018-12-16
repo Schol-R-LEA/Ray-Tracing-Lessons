@@ -1,6 +1,7 @@
+
 #!r6rs
 
-(library (ray-tracing colors)
+(library (colors rgb-colors)
   (export make-rgb-color rgb-color?
           red-of green-of blue-of color=?
           rgb-color->list rgb-color->numeric-string

@@ -6,7 +6,7 @@
   (rnrs (6))  
   ;; unit testing
   (srfi :64)
-  (ray-tracing colors)
+  (colors rgb-colors)
   (average))
 
 
@@ -49,8 +49,8 @@ https://stackoverflow.com/questions/2710713/algorithm-to-generate-all-possible-p
    (test-group 
     "Test creation of new color"
     (let ((maroon (make-rgb-color #xff 0 #xff)))
-      ;; (display (red-of maroon))
-      ;; (newline)
+      ;;(display (rgb-color->list maroon))
+      ;;(newline)
       (test-equal #xff (red-of maroon))
       (test-equal 0 (green-of maroon))
       (test-equal #xff (blue-of maroon))))
@@ -80,8 +80,8 @@ https://stackoverflow.com/questions/2710713/algorithm-to-generate-all-possible-p
    (test-group 
     "Test comparing colors"
     ;; a few manual tests to start
-    (test-assert (color=? rgb-red rgb-red))
-    (test-assert (not (color=? rgb-red rgb-green)))
+    (test-assert (rgb-color=? rgb-red rgb-red))
+    (test-assert (not (rgb-color=? rgb-red rgb-green)))
 
     ;; generative test series
     #|
@@ -123,48 +123,50 @@ https://stackoverflow.com/questions/2710713/algorithm-to-generate-all-possible-p
                       (not test-result)))))))))
     |#
 
+    )
+    
    (test-group 
     "Test values blending, additive mixing, 
      and subtractive mixing of colors"
     (let ((magenta (blend-colors rgb-red rgb-blue)))
-      ;; (display "magenta: ")
-      ;; (display (rgb-color->numeric-string magenta))
-      ;; (newline)
+      ;;(display "magenta: ")
+      ;;(display (rgb-color->numeric-string magenta))
+      ;;(newline)
       (test-equal #x7f (red-of magenta))
       (test-equal 0 (green-of magenta))
       (test-equal #x7f (blue-of magenta))
-      (test-assert (color=? magenta rgb-magenta)))
+      (test-assert (rgb-color=? magenta rgb-magenta)))
     
     (let ((yellow (blend-colors rgb-red rgb-green)))
-      ;; (display "yellow: ")
-      ;; (display (rgb-color->numeric-string yellow))
-      ;; (newline)
+      ;;(display "yellow: ")
+      ;;(display (rgb-color->numeric-string yellow))
+      ;;(newline)
       (test-equal #x7f (red-of yellow))
       (test-equal #x7f (green-of yellow))
       (test-equal #x00 (blue-of yellow))
-      (test-assert (color=? yellow rgb-yellow))
+      (test-assert (rgb-color=? yellow rgb-yellow))
 
       (let ((maroon (add-colors rgb-red rgb-blue)))
-        ;; (display "maroon: ")
-        ;; (display (rgb-color->numeric-string maroon))
-        ;; (newline)
+        ;;(display "maroon: ")
+        ;;(display (rgb-color->numeric-string maroon))
+        ;;(newline)
         (test-equal #xff (red-of maroon))
         (test-equal 0 (green-of maroon))
         (test-equal #xff (blue-of maroon))
-        (test-assert (color=? maroon rgb-maroon)))
+        (test-assert (rgb-color=? maroon rgb-maroon)))
       
       (let ((maroon (make-rgb-color #xff 0 #xff))
             (red-blue (add-colors rgb-red rgb-blue)))
-        ;; (display "maroon: ")
-        ;; (display (rgb-color->numeric-string maroon))
-        ;; (newline)
-        ;; (display "red-blue: ")
-        ;; (display (rgb-color->numeric-string red-blue))
-        ;; (newline)
+        ;;(display "maroon: ")
+        ;;(display (rgb-color->numeric-string maroon))
+        ;;(newline)
+        ;;(display "red-blue: ")
+        ;;(display (rgb-color->numeric-string red-blue))
+        ;;(newline)
         (test-equal (red-of maroon) (red-of red-blue))
         (test-equal (green-of maroon) (green-of red-blue))
         (test-equal (blue-of maroon) (blue-of red-blue))
-        (test-assert (color=? maroon red-blue)))))
+        (test-assert (rgb-color=? maroon red-blue)))))
    
    (test-group 
     "Test returing PPM formatted colors"
