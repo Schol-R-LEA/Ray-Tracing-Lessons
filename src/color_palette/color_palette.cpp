@@ -2,8 +2,8 @@
 
 int main()
 {
-   int nx = 200;
-   int ny = 100;
+   int nx = 800;
+   int ny = 400;
    
    std::cout << "P3" << std::endl;
    std::cout << nx << " " << ny << std::endl;

@@ -9,4 +9,4 @@
   (format "P3~%~a ~a~%~a~%" width height (exact (ceiling range))))
 
 (define (format-ppm-element)
-  (format))
+  (format ""))

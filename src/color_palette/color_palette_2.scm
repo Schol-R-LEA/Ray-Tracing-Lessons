@@ -6,7 +6,7 @@
   (rnrs io simple (6))
 
   ;; rgb-color type
-  (ray-tracing colors)
+  (colors rgb-colors)
 
   ;; basic string formatting
   (srfi :28))
@@ -26,6 +26,7 @@
                 (* (/ j ny) offset)
                 (* 0.2 offset))))
           (display (rgb-color->numeric-string hue))
-          (newline))))))
+          (display #\space)))
+      (newline))))
   
 (color-palette 200 100 255)

@@ -2,98 +2,93 @@
 
 (library (ray-tracing point3D)
   (export point3D make-point3D point3D?
-          n-of-3D-point x-of-3D-point y-of-3D-point z-of-3D-point
-          sv-get-list
-          sv=?)
-
+          x-of y-of z-of
+          point3D=? point3D-copy
+          point3D-add point3D-subtract
+          point3D-scalar-multiply point3D-flat-multiply
+          point3D-scalar-divide point3D-flat-divide
+          point3D-dot-product point3D-cross-product)
   (import (rnrs base (6))
-          (rnrs (6))
-          (ray-tracing vector3D)
-          (ray-tracing point3D)
-          (average))
-
- (define (ieee-double-constrain point-element)
-    (if (float? point-element)
-        (let ((bv (make-bytevector 8)))
-          (bytevector-ieee-double-native-set! bv point-element)
-          bv)
-        #f))
+          (rnrs (6)))
 
 
-  (define (point3D-element? el)
-    (and 
-     (bytevector? el)
-     (= (bytevector-length el) 8)))
+  (define-record-type (point3D make-point3D point3D?)
+    (fields (immutable x x-of)
+            (immutable y y-of)
+            (immutable z z-of))
+    (protocol
+     (lambda (ctor)
+       (lambda (a b c)
+         (ctor a b c)))))
 
 
-  (define (point3D-transcode point-element)
-    (list (ieee-double-constrain point-element)))
+  (define (point3D=? a b)
+    (and
+     (point3D? a)
+     (point3D? b)
+     (= (x-of a) (x-of b))
+     (= (y-of a) (y-of b))
+     (= (z-of a) (z-of b))))
+
+
+  (define (point3D-copy source)
+    (make-point3D (x-of source) (y-of source) (z-of source)))
+
+
+  (define (point3D-add augend addend)
+    (make-point3D
+     (+ (x-of augend) (x-of addend))
+     (+ (y-of augend) (y-of addend))
+     (+ (z-of augend) (z-of addend))))
+
+
+  (define (point3D-subtract minuend subtrahend)
+    (make-point3D
+     (- (x-of minuend) (x-of subtrahend))
+     (- (y-of minuend) (y-of subtrahend))
+     (- (z-of minuend) (z-of subtrahend))))
+
+
+  (define (point3D-scalar-multiply multiplier multiplicand)
+    (make-point3D
+     (* (x-of multiplier) multiplicand)
+     (* (y-of multiplier) multiplicand)
+     (* (z-of multiplier) multiplicand)))    
+  
+
+  (define (point3D-flat-multiply multiplier multiplicand)
+    (make-point3D
+     (* (x-of multiplier) (x-of multiplicand))
+     (* (y-of multiplier) (y-of multiplicand))
+     (* (z-of multiplier) (z-of multiplicand))))    
+
+
+  (define (point3D-scalar-divide dividend divisor)
+    (make-point3D
+     (/ (x-of dividend) divisor)
+     (/ (y-of dividend) divisor)
+     (/ (z-of dividend) divisor)))    
 
   
-  ;;; A type that represents a point in three dimensional space 
-  ;;; as a bytevector holding three double-precision floating-point values.
-
-
-  (define rd-point3D
-    (make-record-type-descriptor 
-     'point3D
-     rd-vector3D #f #f #f 
-     '#()))
-
-
-  (define cd-point3D 
-    (make-record-constructor-descriptor
-     rd-point3D cd-vector3D
-     (lambda (ctor-vec3d)
-       (lambda (x y z)
-         (let ((ctor-point3D 
-                (ctor-vec3d rgb-element?
-                            rgb-transcode 
-                            (ieee-double-constrain r) 
-                            (ieee-double-constrain g)
-                            (ieee-double--constrain b))))
-           (ctor-point3D))))))
-
-
-  (define make-point3D 
-    (record-constructor cd-point3D))
-
-  (define point3D?
-    (record-predicate rd-point3D))
-
-  (define (x-of-3D-point point)
-    (vec3d-x-of point bytevector-ieee-double-native-ref))
-
-  (define (y-of-3D-point point)
-    (vec3d-y-of point bytevector-ieee-double-native-ref))
-
-  (define (z-of-3D-point point)
-    (bytevector-ieee-double-native-ref))
-
-
-  (define  (point3D->list poin)
-    (list (x-of-3D-point point) (y-of-3D-point point) (z-of-3D-point point)))
-
-
-  (define (point3D-dot-product base multiplicand)
-    (+ 
-     (* () (vec3d-x-of multiplicand field-accessor))
-     (* (vec3d-y-of base field-accessor) (vec3d-y-of multiplicand field-accessor))
-     (* (vec3d-z-of base field-accessor) (vec3d-z-of multiplicand field-accessor))))
-
-
-  (define (sv-cross-product base multiplicand)
+  (define (point3D-flat-divide dividend divisor)
     (make-point3D
-     type-predicate transcoder accessor-code
-     (- (* (vec3d-n-of base 1 field-accessor) 
-           (vec3d-n-of multiplicand 2 field-accessor))
-        (* (vec3d-n-of base 2 field-accessor) 
-           (vec3d-n-of multiplicand 1 field-accessor)))
-     (- (* (vec3d-n-of base 0 field-accessor) 
-           (vec3d-n-of multiplicand 1 field-accessor))
-        (* (vec3d-n-of base 1 field-accessor) 
-           (vec3d-n-of multiplicand 0 field-accessor)))
-     (- (* (vec3d-n-of base 1 field-accessor) 
-           (vec3d-n-of multiplicand 2 field-accessor))
-        (* (vec3d-n-of base 2 field-accessor) 
-           (vec3d-n-of multiplicand 1 field-accessor)))))
+     (/ (x-of dividend) (x-of divisor))
+     (/ (y-of dividend) (y-of divisor))
+     (/ (z-of dividend) (z-of divisor))))    
+
+  
+  (define (point3D-dot-product multiplier multiplicand)
+    (+ 
+     (* (x-of multiplier) (x-of multiplicand))
+     (* (y-of multiplier) (y-of multiplicand))
+     (* (z-of multiplier) (z-of multiplicand))))
+
+
+  (define (point3D-cross-product multiplier multiplicand)
+    (make-point3D
+     (- (* (y-of multiplier) (z-of multiplicand))
+        (* (z-of multiplier) (y-of multiplicand)))
+     (- (- (* (x-of multiplier) (z-of multiplicand))
+           (* (z-of multiplier) (x-of multiplicand))))
+     (- (* (x-of multiplier) (y-of multiplicand))
+        (* (y-of multiplier) (x-of multiplicand))))))

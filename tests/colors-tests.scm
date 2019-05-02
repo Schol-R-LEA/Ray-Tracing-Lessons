@@ -169,6 +169,6 @@ https://stackoverflow.com/questions/2710713/algorithm-to-generate-all-possible-p
         (test-assert (rgb-color=? maroon red-blue)))))
    
    (test-group 
-    "Test returing PPM formatted colors"
+    "Test returning PPM formatted colors"
     (test-assert (string=? "255 0 0" 
                            (rgb-color->numeric-string rgb-red))))))
