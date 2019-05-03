@@ -17,7 +17,7 @@
 
 
 (define (format-ray3D ray)
-  (format "{~A -> ~A}~%"
+  (format "{~A,~A}~%"
           (format-point3D (origin-get ray))
           (format-point3D (direction-get ray))))
 

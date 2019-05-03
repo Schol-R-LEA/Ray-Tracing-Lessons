@@ -32,9 +32,9 @@
                         (not (string=? ppm "")))
                    ppm
                    (format "P3~%~a ~a~%~a~%"
-                           (exact (ceiling x))
-                           (exact (ceiling y))
-                           (exact (ceiling clr)))))))))
+                           (exact (floor x))
+                           (exact (floor y))
+                           (exact (floor clr)))))))))
 
 
   (define (ppm-append-pixel ppmr color)
@@ -44,7 +44,7 @@
                      (ppm-colors ppmr)
                      (string-append (ppm-data ppmr)
                                     (string-append (rgb-color->numeric-string color)
-                                                   " "))))
+                                                   "  "))))
 
 
   (define (ppm-terminate-row ppmr)

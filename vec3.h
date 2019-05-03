@@ -12,8 +12,8 @@
 #ifndef VEC3H
 #define VEC3H
 
-#include <math.h>
-#include <stdlib.h>
+#include <cmath>
+#include <cstdlib>
 #include <iostream>
 
 class vec3  {

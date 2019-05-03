@@ -59,7 +59,7 @@
 
   (define (ray3D-point-at ray t)
     (point3D-add (origin-get ray)
-                  (point3D-scalar-multiply (direction-get ray) t)))
+                 (point3D-scalar-multiply (direction-get ray) t)))
 
 
   (define (ray3D-point-from-camera-at ray t)
@@ -67,10 +67,14 @@
 
 
   (define (ray3D-unit-ray ray)
-    (point3D-scalar-divide (-  (direction-get ray) (origin-get ray))
-                           (ray3D-length ray)))
+    (make-ray3D (origin-get ray)
+                (point3D-scalar-divide (point3D-subtract
+                                        (direction-get ray)
+                                        (origin-get ray))
+                                       (ray3D-length ray))))
 
 
   (define (ray3D-unit-ray-from-camera ray)
-    (point3D-scalar-divide (direction-get ray)
-                           (ray3D-length-from-camera ray))))
+    (make-ray3D camera-focal-point
+                (point3D-scalar-divide (direction-get ray)
+                                       (ray3D-length-from-camera ray)))))

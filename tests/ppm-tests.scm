@@ -33,7 +33,7 @@
       (test-assert (string=? (ppm-data (ppm-terminate-row test-ppm))
                              "P3\n500 500\n255\n\n"))
       (test-assert (string=? (ppm-data (ppm-append-pixel test-ppm rgb-blue))
-                             "P3\n500 500\n255\n0 0 255 "))
+                             "P3\n500 500\n255\n0 0 255  "))
       (let ((test-ppm-final
              (let outer ((j 0)
                          (outer-ppm test-ppm))
