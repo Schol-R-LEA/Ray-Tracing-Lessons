@@ -4,7 +4,8 @@
   (export point3D make-point3D point3D?
           x-of y-of z-of
           point3D=? point3D-copy
-          point3D-add point3D-subtract
+          point3D-add point3D-scalar-add
+          point3D-subtract point3D-scalar-subtract
           point3D-scalar-multiply point3D-flat-multiply
           point3D-scalar-divide point3D-flat-divide
           point3D-dot-product point3D-cross-product)
@@ -42,6 +43,13 @@
      (+ (z-of augend) (z-of addend))))
 
 
+  (define (point3D-scalar-add augend addend)
+    (make-point3D
+     (+ (x-of augend) addend)
+     (+ (y-of augend) addend)
+     (+ (z-of augend) addend)))
+
+
   (define (point3D-subtract minuend subtrahend)
     (make-point3D
      (- (x-of minuend) (x-of subtrahend))
@@ -49,12 +57,19 @@
      (- (z-of minuend) (z-of subtrahend))))
 
 
+  (define (point3D-scalar-subtract minuend subtrahend)
+    (make-point3D
+     (- minuend (x-of subtrahend))
+     (- minuend (y-of subtrahend))
+     (- minuend (z-of subtrahend))))
+
+
   (define (point3D-scalar-multiply multiplier multiplicand)
     (make-point3D
      (* (x-of multiplier) multiplicand)
      (* (y-of multiplier) multiplicand)
-     (* (z-of multiplier) multiplicand)))    
-  
+     (* (z-of multiplier) multiplicand)))
+
 
   (define (point3D-flat-multiply multiplier multiplicand)
     (make-point3D
